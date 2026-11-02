@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111827">
+  <meta name="description" content="Secure GPS-based office attendance portal"><title>Office Attendance Portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">A</span><div><strong id="brandName">Office Attendance</strong><small>GPS attendance portal</small></div></div>
+      <div id="topUser" class="top-user hidden"><span id="topUserName"></span><button class="btn btn-ghost btn-small" id="logoutBtn">Log out</button></div>
+    </header>
+
+    <section id="loginView" class="login-wrap">
+      <div class="login-card">
+        <div class="eyebrow">WELCOME</div>
+        <h1>Office attendance</h1>
+        <p class="muted">Sign in to manage or record your attendance.</p>
+        <form id="loginForm">
+          <label>User ID<input id="userId" autocomplete="username" required placeholder="Enter your user ID"></label>
+          <label>Password<input id="password" type="password" autocomplete="current-password" required placeholder="Enter your password"></label>
+          <button class="btn btn-primary full" type="submit">Sign in</button>
+        </form>
+        <div id="loginError" class="notice error hidden"></div>
+      </div>
+    </section>
+
+    <section id="employeeView" class="hidden">
+      <div class="welcome-row"><div><div class="eyebrow">EMPLOYEE WORKSPACE</div><h1>Good to see you, <span id="employeeName">there</span></h1><p class="muted" id="employeeDate">Your attendance at a glance</p></div><div class="clock-card"><small>NEPAL TIME</small><strong id="liveClock">--:--:--</strong><span id="clockDate"></span></div></div>
+      <div class="stats-grid">
+        <article class="stat-card"><span>Today</span><strong id="todayHours">0h 0m</strong><small>Hours worked today</small></article>
+        <article class="stat-card"><span>This week</span><strong id="weekHours">0h 0m</strong><small>Sunday through today</small></article>
+        <article class="stat-card"><span>This month</span><strong id="monthHours">0h 0m</strong><small>Total month to date</small></article>
+      </div>
+      <div class="main-grid">
+        <article class="panel punch-panel">
+          <div class="panel-head"><div><div class="eyebrow">ATTENDANCE</div><h2>Today's attendance</h2></div><span id="attendanceStatus" class="pill">Not punched in</span></div>
+          <div class="punch-time"><strong id="punchClock">--:--</strong><span id="punchHint">Office punch-in opens at 10:00 AM</span></div>
+          <div id="countdown" class="countdown"></div>
+          <button id="punchBtn" class="btn btn-primary full" disabled>Checking availability…</button>
+          <button id="punchOutsideBtn" class="btn btn-outside full hidden" type="button">Punch out outside office</button>
+          <p id="outsidePunchHint" class="tiny muted hidden">Use this only if you have already left the office. Your current GPS coordinates, accuracy and punch-out time will be saved for admin review.</p>
+          <div id="punchMessage" class="notice hidden"></div>
+          <div class="punch-meta"><div><span>Punch in</span><strong id="punchInTime">—</strong></div><div><span>Punch out</span><strong id="punchOutTime">—</strong></div></div>
+          <p class="tiny muted">GPS is required for punch-in and normal punch-out. If you have already left the office, use the separate outside-office punch-out option when it appears.</p>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><div class="eyebrow">YOUR RECORDS</div><h2>Recent attendance</h2></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Date</th><th>In</th><th>Out</th><th>Hours</th></tr></thead><tbody id="employeeHistory"></tbody></table></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="adminView" class="hidden">
+      <div class="welcome-row"><div><div class="eyebrow">ADMIN WORKSPACE</div><h1>Office overview</h1><p class="muted" id="adminDate"></p></div><button class="btn btn-secondary" id="refreshAdmin">Refresh data</button></div>
+      <div class="stats-grid four">
+        <article class="stat-card"><span>Employees</span><strong id="countEmployees">0</strong><small>Active accounts</small></article>
+        <article class="stat-card"><span>Present today</span><strong id="countPresent">0</strong><small>Attendance recorded</small></article>
+        <article class="stat-card"><span>Currently working</span><strong id="countWorking">0</strong><small>Not punched out</small></article>
+        <article class="stat-card"><span>Absent today</span><strong id="countAbsent">—</strong><small>After office closing time</small></article>
+      </div>
+      <nav class="tabs"><button class="tab active" data-tab="overview">Overview</button><button class="tab" data-tab="employees">Employees</button><button class="tab" data-tab="records">Attendance records</button><button class="tab" data-tab="settings">Office settings</button></nav>
+      <section id="tab-overview" class="panel tab-panel">
+        <div class="panel-head"><div><div class="eyebrow">TEAM PERFORMANCE</div><h2>Employee attendance summary</h2></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Today</th><th>This week</th><th>This month</th><th>Status</th></tr></thead><tbody id="employeeStats"></tbody></table></div>
+      </section>
+      <section id="tab-employees" class="panel tab-panel hidden">
+        <div class="panel-head"><div><div class="eyebrow">PEOPLE & ACCESS</div><h2>Manage employees and admins</h2></div></div>
+        <form id="userForm" class="form-grid">
+          <label>User ID<input id="newUserId" required placeholder="e.g. employee01"></label>
+          <label>Full name<input id="newUserName" required placeholder="Full name"></label>
+          <label>Password<input id="newUserPassword" type="password" placeholder="Required for new user"></label>
+          <label>Role<select id="newUserRole"><option value="employee">Employee</option><option value="admin">Admin</option></select></label>
+          <button class="btn btn-primary" type="submit">Save user</button>
+          <button class="btn btn-secondary" type="button" id="clearUserForm">Clear</button>
+        </form>
+        <p class="tiny muted">For an existing User ID, enter a new password only if you want to change it. Passwords are stored in the private Google Sheet as requested.</p>
+        <div class="table-wrap"><table><thead><tr><th>User ID</th><th>Name</th><th>Role</th><th>Status</th><th>Action</th></tr></thead><tbody id="usersTable"></tbody></table></div>
+      </section>
+      <section id="tab-records" class="panel tab-panel hidden">
+        <div class="panel-head"><div><div class="eyebrow">ATTENDANCE ACTIVITY</div><h2>Attendance records</h2></div><input id="recordSearch" class="search-input" placeholder="Search employee or date"></div>
+        <div class="table-wrap"><table><thead><tr><th>Date</th><th>Employee</th><th>Punch in</th><th>Punch out</th><th>Hours</th><th>In GPS</th><th>Out GPS</th><th>Punch-out type</th></tr></thead><tbody id="recordsTable"></tbody></table></div>
+      </section>
+      <section id="tab-settings" class="panel tab-panel hidden">
+        <div class="panel-head"><div><div class="eyebrow">WORKPLACE CONFIGURATION</div><h2>Office settings</h2></div></div>
+        <form id="settingsForm" class="settings-grid">
+          <label>Office name<input id="sOfficeName"></label>
+          <label>Office opening time<input id="sOfficeStart" type="time" required></label>
+          <label>Office closing time<input id="sOfficeEnd" type="time" required></label>
+          <label>GPS permitted radius (metres)<input id="sRadius" type="number" min="1" max="10000" required></label>
+          <label>Office latitude<input id="sLat" type="number" step="any" placeholder="e.g. 27.7172" required></label>
+          <label>Office longitude<input id="sLng" type="number" step="any" placeholder="e.g. 85.3240" required></label>
+          <label>Maximum GPS inaccuracy (metres)<input id="sAccuracy" type="number" min="1" required></label>
+          <div class="setting-note"><strong>Timezone</strong><span>Asia/Kathmandu (fixed)</span></div>
+          <div class="days-box"><strong>Working days</strong><div id="workingDays" class="day-checks"></div><small>Default: Sunday–Friday. Saturday is off.</small></div>
+          <div class="setting-note wide"><strong>Punch rules</strong><span>Punch-in and normal punch-out require office GPS. Employees outside the office can use the separately recorded outside-office punch-out. Any session still open is automatically closed at 11:00 PM Nepal time and flagged for admin review.</span></div>
+          <button class="btn btn-primary" type="submit">Save office settings</button>
+        </form>
+      </section>
+    </section>
+    <div id="globalToast" class="toast hidden"></div>
+    <footer>Office Attendance · Kathmandu time (Asia/Kathmandu)</footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
